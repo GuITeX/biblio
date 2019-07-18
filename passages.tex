@@ -1,0 +1,97 @@
+\documentclass[a4paper]{article}
+%\usepackage[T1]{fontenc}
+%\usepackage[utf8]{inputenc}
+\usepackage{cfr-lm}
+%\usepackage[english,italian]{babel}
+%\usepackage[autostyle,italian=guillemets]{csquotes}
+\usepackage{xpatch}
+\usepackage{microtype}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,
+                chains,
+                positioning,
+                fit,
+                calc,
+                shapes.geometric}
+\usepackage{siunitx}
+
+\tikzset{FlowChart/.style={
+file/.style = {rectangle, rounded corners, draw, fill=red!30,
+                    minimum width=2cm, minimum height=0.8cm, 
+                    align=center},
+  program/.style = {rectangle, rounded corners, draw, fill=blue!30,
+                    minimum width=2cm, minimum height=0.8cm, 
+                    align=center},
+ bibfile/.style = {rectangle, rounded corners, draw, fill=green!30,
+                    minimum width=2cm, minimum height=0.8cm, 
+                    align=center}%,
+    %arrow/.style = {thick,-Triangle}
+        }   }
+\tikzset{line/.style ={draw, thick, arrows={-Latex}}}
+\tikzset{container/.style={draw, rectangle , opacity=0.075 , fill=black , inner sep=1.5em}}
+\usepackage[active,tightpage]{preview}
+\PreviewEnvironment{tikzpicture}
+\setlength\PreviewBorder{0em}
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+
+\linespread{0.7}
+
+\begin{document}
+    \begin{tikzpicture}[FlowChart,
+    %node distance = 5mm and 7mm
+    ]
+% nodes in chain                        
+\node [file] (source) {\footnotesize File\\\footnotesize sorgente};
+\node at (source.south west) [below right ,node distance=0 and 0] {\texttt{.tex}};
+\node [bibfile, right of=source, node distance=10em] (biblatex) {\texttm{\textl{\textit{biblatex}}}};
+\node at (biblatex.south west) [below right ,node distance=0 and 0] {\texttt{.sty}};
+\node [bibfile, right of=biblatex, node distance=8em] (style) {Stile};
+\node at (style.south west) [below right ,node distance=0 and 0] {\texttt{.bbx/cbx}};
+\node [file, right of=style, node distance=8em] (bib) {\footnotesize Database\\\footnotesize bibliografico};
+\node at (bib.south west) [below right ,node distance=0 and 0] {\texttt{.bib}};
+\coordinate (middle1) at ($(source.south)!0.5!(biblatex.south)$);
+\node [program , below of=middle1 , node  distance=4em] (pdflatex1) {\LaTeX};
+\node [program , below of=pdflatex1 , node  distance=6em] (pdflatex2) {\LaTeX};
+\node at (pdflatex2.south) [below left ,node distance =0 and 0] {\texttt{.aux}};
+\coordinate (middle2) at ($(pdflatex1.east)!0.4!(pdflatex2.east)$);
+\coordinate (middle3) at ($(pdflatex1.south)!0.4!(pdflatex2.north)$);
+%\fill (middle3) circle (2pt);
+\node at (pdflatex1.south) [below left ,node distance =0 and 0] (aux){\texttt{.aux}};
+\node [program , right of=middle3 , node  distance=17em] (biber) {\textsf{biber}};
+\node at (biber.south west) [below right ,node distance=0 and 0] {\texttt{.bbl}};
+\node at (pdflatex1.330) [below right, node distance=0 and 0] (bcf){\texttt{.bcf}};
+\node [file, below of=bib, node distance=12em] (log1) {File di log};
+\node at (log1.south west) [below right ,node distance=0 and 0] {\texttt{.blg}};
+\node [program , below of=pdflatex2 , node  distance=5em] (pdflatex3) {\LaTeX};
+\node at (pdflatex3.south) [below right ,node distance =0 and 0] {\texttt{.pdf}};
+\node [file , below of=pdflatex3 , node  distance=5em] (pdf) {File PDF};
+\coordinate (middle4) at ($(biblatex.south)!0.5!(style.south)$);
+\node [file , below of=middle4 , node  distance=17.7em] (log2) {File di log};
+\node at (log2.south west) [below right ,node distance =0 and 0] {\texttt{.log}};
+
+
+\begin{pgfonlayer}{background}
+\node [container, fit=(biblatex) (bib)] (bibs) {};
+\end{pgfonlayer}
+
+\path [->, line] (style) -- (biblatex);
+\path [->, line] (biber) -| (log1);
+\path [->, line] (pdflatex3.350) -| (log2);
+\path [->, line] (pdflatex3) -- (pdf);
+\path [->, line] (pdflatex1) -- (pdflatex2);
+\path [->, line] (pdflatex2) -- (pdflatex3);
+\path [->, line] (bib) -| (biber);
+\path [->, line] (pdflatex1.320) |- (biber);
+\path [->, line] (biber) |- (pdflatex2);
+\path [->, line] (biber) |- (pdflatex3.10);
+%\path [->, line] (biber) -- ($(biber.south)-(0,0.5)$) -| (biblatex.320);
+\path [->, line] (biblatex) -- ($(biblatex.south)-(0,0.7)$) -| (pdflatex1.40);
+\path [->, line] (biblatex) -- ($(biblatex.south)-(0,2.8)$) -| (pdflatex2.40);
+\path [->, line] (biblatex) -- ($(biblatex.south)-(0,4.5)$) -| (pdflatex3.40);
+\path [->, line] (source) -- ($(source.south)-(0,0.7)$) -| (pdflatex1);
+\path [->, line] (source) -- ($(source.south)-(0,2.8)$) -| (pdflatex2.140);
+\path [->, line] (source) -- ($(source.south)-(0,4.5)$) -| (pdflatex3.140);
+
+	\end{tikzpicture}
+\end{document}
