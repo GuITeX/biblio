@@ -16,7 +16,10 @@
 \usepackage{siunitx}
 
 \tikzset{FlowChart/.style={
-file/.style = {rectangle, rounded corners, draw, fill=red!30,
+filei/.style = {rectangle, rounded corners, draw, fill=red!30,
+                    minimum width=2cm, minimum height=0.8cm, 
+                    align=center},
+fileo/.style = {rectangle, rounded corners, draw, fill=orange!30,
                     minimum width=2cm, minimum height=0.8cm, 
                     align=center},
   program/.style = {rectangle, rounded corners, draw, fill=blue!30,
@@ -42,13 +45,13 @@ file/.style = {rectangle, rounded corners, draw, fill=red!30,
     %node distance = 5mm and 7mm
     ]
 % nodes in chain                        
-\node [file] (source) {\footnotesize File\\\footnotesize sorgente};
+\node [filei] (source) {\footnotesize File\\\footnotesize sorgente};
 \node at (source.south west) [below right ,node distance=0 and 0] {\texttt{.tex}};
 \node [bibfile, right of=source, node distance=10em] (biblatex) {\texttm{\textl{\textit{biblatex}}}};
 \node at (biblatex.south west) [below right ,node distance=0 and 0] {\texttt{.sty}};
 \node [bibfile, right of=biblatex, node distance=8em] (style) {Stile};
 \node at (style.south west) [below right ,node distance=0 and 0] {\texttt{.bbx/cbx}};
-\node [file, right of=style, node distance=8em] (bib) {\footnotesize Database\\\footnotesize bibliografico};
+\node [filei, right of=style, node distance=8em] (bib) {\footnotesize Database\\\footnotesize bibliografico};
 \node at (bib.south west) [below right ,node distance=0 and 0] {\texttt{.bib}};
 \coordinate (middle1) at ($(source.south)!0.5!(biblatex.south)$);
 \node [program , below of=middle1 , node  distance=4em] (pdflatex1) {\LaTeX};
@@ -61,13 +64,13 @@ file/.style = {rectangle, rounded corners, draw, fill=red!30,
 \node [program , right of=middle3 , node  distance=17em] (biber) {\textsf{biber}};
 \node at (biber.south west) [below right ,node distance=0 and 0] {\texttt{.bbl}};
 \node at (pdflatex1.330) [below right, node distance=0 and 0] (bcf){\texttt{.bcf}};
-\node [file, below of=bib, node distance=12em] (log1) {File di log};
+\node [fileo, below of=bib, node distance=12em] (log1) {File di log};
 \node at (log1.south west) [below right ,node distance=0 and 0] {\texttt{.blg}};
 \node [program , below of=pdflatex2 , node  distance=5em] (pdflatex3) {\LaTeX};
 \node at (pdflatex3.south) [below right ,node distance =0 and 0] {\texttt{.pdf}};
-\node [file , below of=pdflatex3 , node  distance=5em] (pdf) {File PDF};
+\node [fileo , below of=pdflatex3 , node  distance=5em] (pdf) {File PDF};
 \coordinate (middle4) at ($(biblatex.south)!0.5!(style.south)$);
-\node [file , below of=middle4 , node  distance=17.7em] (log2) {File di log};
+\node [fileo , below of=middle4 , node  distance=17.7em] (log2) {File di log};
 \node at (log2.south west) [below right ,node distance =0 and 0] {\texttt{.log}};
 
 

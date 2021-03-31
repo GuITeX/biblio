@@ -10,7 +10,7 @@
 %\documentclass[b5paper,11pt,ipertesto,oneside]{guidatematica}
 %\documentclass[tablet,9pt,ipertesto,openany]{guidatematica}
 \documentclass[b5paper,11pt,oneside]{guidatematica}
-\ProvidesFile{bibliografia.tex}[2019/07/16 v.2.1.3 I software bibliografici e BibLaTeX]
+\ProvidesFile{bibliografia.tex}[2021/03/31 v.2.2.3 La bibliografia con BibLaTeX]
 \setotherlanguages{english,german}
 
 \usepackage{array,longtable,tabularx}
@@ -40,20 +40,23 @@
 \usepackage[autostyle,italian=guillemets]{csquotes}
 \usepackage[backend=biber,%block=ragged,
 	annotate=true,short,reflist,% reflist=autore-data
-	giveninits=true,% solo iniziale del nome in bibliografia
+	%giveninits=true,% solo iniziale del nome in bibliografia, usato dalle altre guide tematiche, ma non conforme allo stile Chicago
 		style=windycity,hyperref]{biblatex}
 \DeclareFieldFormat{annotation}{\par{\small{#1}}}
-\renewcommand{\mkbibnamefamily}[1]{\textsc{#1}}% cognome autori in maiuscoletto in bib
-%\DeclareFieldFormat{url}{\newline{\url{#1}}}
-\DeclareFieldFormat{note}{\textcolor{brown}{#1}}
+%\renewcommand{\mkbibnamefamily}[1]{\textsc{#1}}% cognome autori in maiuscoletto in bib, come le altre guide tematiche, non previsto dallo stile Chicago
+%\DeclareFieldFormat{url}{\newline{\url{#1}}} % url nei rif. bibliografici in una nuova riga
+\definecolor{maroon}{rgb}{0.5, 0.0, 0.0}
+\DeclareFieldFormat{note}{\textcolor{maroon}{#1}} % colora il campo note in bibliografia
 \addbibresource{guida.bib}
 \addbibresource{guida2.bib}
-%\usepackage{indentfirst}
 
+% definizione stili personali per l'inserimento di sintassi
 \lstdefinestyle{es}{frame=lines,%
 	basicstyle={\ttfamily\small},%
 	breaklines=true,%
-	escapeinside={(*@}{@*)}}
+	escapeinside={(*@}{@*)},
+	moredelim=**[is][\color{maroon}]{<<}{>>},
+	}
 \lstdefinestyle{cmd}{frame=lines,%
 	basicstyle={\small},%
 	language=[LaTeX]{TeX},%
@@ -66,12 +69,12 @@
 \usepackage{hologo}
 \usepackage{titling}
 %\usepackage{guit}
-%\usepackage{sectsty}
-%\allsectionsfont{\sffamily}
+
 
 \usepackage{hyperref}
-%\hypersetup{colorlinks=true,urlcolor=red,citecolor=cyan,breaklinks,bookmarksopen}
+%\hypersetup{colorlinks=true,urlcolor=red,citecolor=cyan,breaklinks,bookmarksopen} non usato in quanto i colori sono già definiti dalla classe
 
+% Suddivisione dei rif. bibliografici
 \DeclareSourcemap{
   \maps[datatype=bibtex, overwrite]{
     \map{
@@ -85,12 +88,14 @@
   }
 }
 
+% macro personale per l'inserimento di testo in inglese, così da sillabare correttamente
 \newcommand{\eng}[1]{\textenglish{\emph{#1}}}
 
 \begin{document}
 
 \author{Filippo Vomiero}
-\title{Utilizzare i software per la gestione della bibliografia con \LaTeX}
+\title{Comporre la bibliografia in \LaTeX}
+\subtitle{\packstyle{biblatex} e i software di gestione bibliografica}
 \GetFileInfo{\jobname.tex}
 \date{Versione \fileversion\ del \filedate}
 \licenza{\thetitle\\%
@@ -136,7 +141,7 @@ In \LaTeX\ è possibile compilare una bibliografia in due modi:%
 	\item se si aggiorna o modifica un riferimento bibliografico, bisogna andare a modificare le bibliografie di tutti i documenti in cui esso appare;
 	\item se si desidera cambiare lo stile dei riferimenti bibliografici, bisogna cambiare a mano \emph{tutte} le voci, una per una.
 	\end{compactitemize}
-\item[automatico] Per ovviare ai problemi del metodo manuale, è decisamente preferibile utilizzare un database esterno contenente i nostri riferimenti bibliografici (tipicamente un file \file{*.bib}), e poi utilizzare un pacchetto di stile che formatterà in modo automatico tutti i riferimenti bibliografici inseriti nel testo.
+\item[automatico] Per ovviare ai problemi del metodo manuale, è decisamente preferibile utilizzare un database esterno contenente i nostri riferimenti bibliografici (tipicamente un file \file{bib}), e poi utilizzare un pacchetto di stile che formatterà in modo automatico tutti i riferimenti bibliografici inseriti nel testo.
 \end{description}
 In questa guida vedremo come utilizzare il metodo automatico, a partire dal capitolo~\ref{auto}. Prima di proseguire, però, meglio dedicare un istante per chiarire alcuni termini che verranno usati con frequenza.
 
@@ -166,19 +171,20 @@ Prima di continuare, è bene fare un po' di chiarezza su alcuni termini che verr
 \footnote{Un eccellente approfondimento è reperibile al seguente indirizzo:\\
 \href{https://tex.stackexchange.com/questions/25701/bibtex-vs-biber-and-biblatex-vs-natbib}{\texttt{https://tex.stackexchange.com/questions/25701/bibtex-vs-biber-and-biblatex\discretionary{}{-}{-}vs-natbib}} 
 Visitato il 21 maggio 2019.}
-In senso stretto \prog{bibtex} è il nome del programma esterno che gestisce le informazioni bibliografiche contenute in un database (un file \file{*.bib}) e le integra in un documento \LaTeX\ (\ref{printbib}), sfruttando i comandi messi a disposizione da un particolare pacchetto, potendo così stabilire lo stile della bibliografia. Tuttavia, spesso il termine è stato usato per indicare elementi differenti, generando un po' di confusione. I software di gestione bibliografica, ad esempio, chiamano ``file bibtex'' il file \file{*.bib} contenente il database bibliografico. Oppure ancora, è facile trovare l'indicazione "gestire la bibliografia con \hologo{BibTeX}" la quale in realtà riassume più operazioni: non compilare la bibliografia con il metodo manuale descritto nella sezione precedente, bensì salvare i riferimenti in un file \file{*.bib} e utilizzare un pacchetto che permetta, sfruttando il programma \prog{bibtex}, di inserire e formattare automaticamente i riferimenti bibliografici e la bibliografia.
+In senso stretto \prog{bibtex} è il nome del programma esterno che gestisce le informazioni bibliografiche contenute in un database (un file \file{bib}), le elabora e le mette a disposizione per essere utilizzate in un documento \LaTeX%\ (\ref{printbib})
+, grazie ai comandi nativi di cui \LaTeX\ è fornito. Eventualmente è possibile utilizzare un pacchetto specifico per formattare i riferimenti e la bibliografia secondo stili diversi. Tuttavia, spesso il termine è stato usato per indicare elementi differenti, generando un po' di confusione. I software di gestione bibliografica, ad esempio, chiamano ``file bibtex'' il file \file{bib} contenente il database bibliografico. Oppure ancora, è facile trovare l'indicazione "gestire la bibliografia con \hologo{BibTeX}" la quale in realtà riassume più operazioni: non compilare la bibliografia con il metodo manuale descritto nella sezione precedente, bensì salvare i riferimenti in un file \file{bib} e utilizzare un pacchetto (solitamente \pack{natbib}) che permetta, sfruttando il programma \prog{bibtex}, di inserire e formattare automaticamente i riferimenti bibliografici e la bibliografia.
 
 Una classificazione precisa deve quindi distinguere:
 \begin{description}
-\item[programmi]\prog{bibtex} e \prog{biber} sono due programmi esterni; la loro interazione con \LaTeX\ è illustrata nella sezione~\ref{printbib}.
-\item[pacchetti]\pack{natbib} e \pack{biblatex} sono due pacchetti che permettono di formattare i riferimenti e la bibliografia. \pack{natbib} funziona solo con \prog{bibtex} e storicamente è stato il pacchetto più utilizzato. \pack{biblatex} invece è sviluppato assieme a \prog{biber} ed è con esso che funziona al meglio, ma, al momento, mantiene la retro-compatibilità con \prog{bibtex}, ed è possibile utilizzarlo con questo programma indicandolo nelle opzioni.
+\item[programmi]\prog{bibtex} e \prog{biber} sono due programmi esterni; il primo può essere utilizzato anche da solo per estrarre le informazioni da un database bibliografico, mentre il secondo va utilizzato necessariamente con il suo pacchetto dedicato, \pack{biblatex}.
+\item[pacchetti]\pack{natbib} e \pack{biblatex} sono due pacchetti che permettono di formattare i riferimenti e la bibliografia. \pack{natbib} funziona solo con \prog{bibtex} e storicamente è stato il pacchetto più utilizzato. \pack{biblatex} invece è sviluppato assieme a \prog{biber} ed è con esso che funziona al meglio, ma è possibile anche utilizzarlo con \prog{bibtex}, inserendo l'opzione appropriata al momento di caricare il pacchetto.%
+\footnote{il fatto che sia possibile, non implica che sia consigliato. La possibilità di scelta viene lasciata per motivi di retro-compatibilità, ma va ricordato che \prog{bibtex} ha molte limitazioni rispetto a \prog{biber}: si veda la sezione~3.15 ``Using the fallback BibTeX backend'' della guida di \pack{biblatex} (\textcite*[150]{biblatex}).}
 \end{description}
 
 Per evitare confusione, quindi, quando nel testo i termini compariranno con la grafia appena utilizzata, il riferimento sarà specifico: \prog{bibtex} indica il programma e \pack{biblatex} il pacchetto. Tuttavia, capiterà spesso di dover fare riferimento ai due ambienti di lavoro in senso più generale, così come ormai è entrato nel linguaggio comune (gli stessi software di gestione bibliografica presi in analisi nel capitolo~\ref{database} utilizzano i termini in questo senso). In queste occasioni, si utilizzerà la scrittura logografica \hologo{BibTeX} e Bib\LaTeX, indicando in tal modo l'intero ecosistema programma più pacchetto: \prog{bibtex}+\pack{natbib} nel primo caso, \prog{biber}+\pack{biblatex} nel secondo.
  
 \section{Pacchetti per la gestione della bibliografia}
 Qui di seguito sono elencati alcuni pacchetti che permettono di gestire automaticamente la bibliografia.
-%\renewcommand{\descriptionlabel}[1]{\hspace*{\labelsep}\textbf{\pack{#1}}}
 \begin{plaindescription}[before={\renewcommand\makelabel[1]{\pack{##1}}}]
 \item[\href{https://ctan.org/pkg/natbib}{natbib}] È uno dei pacchetti  di stile per \prog{bibtex} più famosi e utilizzati, ha il grosso vantaggio che negli anni sono stati creati degli stili per i principali  editori scientifici. Tuttavia non è più aggiornato e quindi, in prospettiva futura, sarebbe meglio migrare verso altri pacchetti. Al momento rimane, comunque, molto valido.
 \item[\href{https://ctan.org/pkg/jurabib}{jurabib}] Altro pacchetto di stile per \prog{bibtex}, nato per far fronte alle complessità dei riferimenti bibliografici in ambito giuridico, ma che è ampiamente adattabile. Anche questo, tuttavia, non è più aggiornato dal suo autore.
@@ -191,12 +197,12 @@ Qui di seguito sono elencati alcuni pacchetti che permettono di gestire automati
 Come anticipato nel capitolo \ref{intro}, una bibliografia gestita automaticamente utilizza un database esterno, interpretato da un programma, (\prog{bibtex} o \prog{biber}), che ne ricava i riferimenti bibliografici, i quali vengono inseriti in un documento secondo uno stile citazionale gestito da un pacchetto come \pack{biblatex}, che a sua volta può servirsi di pacchetti aggiuntivi per impostare lo stile.%
 \footnote{Nella compilazione di questa guida è stato utilizzato il pacchetto \href{https://ctan.org/pkg/windycity}{\pack{windycity}} per formattare riferimenti bibliografici e bibliografia finale secondo il \emph{Chicago Manual of Style}, a cui ho aggiunto alcune modifiche manuali per renderlo più vicino allo stile delle altre guide tematiche.}
 
-\hologo{BibTeX} prevede i database in un file di testo, da non compilare, con estensione \file{*.bib}, e questo rimane il formato più comune.  Bib\LaTeX\ ha una struttura di dati leggermente diversa da \hologo{BibTeX}, per cui può essere necessario modificare manualmente il file passando da uno all'altro, come indicato nella guida del pacchetto al capitolo~2.3, ``Usage notes'' \parencite[123--125]{biblatex}.
+\hologo{BibTeX} prevede i database in un file di testo, da non compilare, con estensione \file{bib}, e questo rimane il formato più comune.  Bib\LaTeX\ ha una struttura di dati leggermente diversa da \hologo{BibTeX}, per cui può essere necessario modificare manualmente il file passando da uno all'altro, come indicato nella guida del pacchetto alla sezione~2.3, ``Usage notes'' (\textcite*[33--41]{biblatex}).
 Alcuni software di gestione della bibliografia, come \prog{Zotero} o \prog{Jabref} supportano anche l'esportazione di un database bibliografico in formato Bib\LaTeX.
 
-Nelle sezioni successive indicherò l'insieme dei dati che compongono il riferimento bibliografico con l'espressione ``record (bibliografico)''. In informatica indica genericamente un oggetto di un database, che è a sua volta un insieme di campi (o elementi), composto da un identificatore univoco e un dato. In biblioteconomia il record bibliografico viene utilizzato esattamente allo stesso modo, con la sola specificazione che i dati sono informazioni bibliografiche. Appare evidente guardando la struttura di un database \file{*.bib}.
+Nelle sezioni successive indicherò l'insieme dei dati che compongono il riferimento bibliografico con l'espressione ``record (bibliografico)''. In informatica indica genericamente un oggetto di un database, che è a sua volta un insieme di campi (o elementi), composto da un identificatore univoco e un dato. In biblioteconomia il record bibliografico viene utilizzato esattamente allo stesso modo, con la sola specificazione che i dati sono informazioni bibliografiche. Appare evidente guardando la struttura di un database \file{bib}.
 
-\section{La sintassi di un file \texttt{*.bib}}\label{syntax}
+\section{La sintassi di un file \texttt{bib}}\label{syntax}
 La bibliografia, intesa come disciplina, individua alcuni elementi fondamentali per identificare un documento a cui si fa riferimento.
 \begin{description}
 \item[responsabilità] Il responsabile dei contenuti generalmente è l'autore, ma in sua mancanza può esserci il curatore, oppure in altri casi un \emph{autore collettivo} come nel caso di enti o associazioni
@@ -206,8 +212,8 @@ La bibliografia, intesa come disciplina, individua alcuni elementi fondamentali 
 \end{description}
 A questi si sommano altri elementi che possono facilitare il reperimento di un documento, come, ad esempio, l'indicazione di edizione, il luogo di pubblicazione e l'editore o il numero di pagine. L'appendice B della norma ISO 690, illustra quali sono gli elementi obbligatori e quali quelli facoltativi, a seconda della tipologia di materiale \parencite[28--32]{iso690}.
 
-In modo analogo anche il \eng{data model} di Bib\LaTeX, mutuato da quello di \hologo{BibTeX}, prevede dei campi obbligatori e altri facoltativi, a seconda della tipologia di documento \parencite[6--44]{biblatex}.
-Per capire come compilare manualmente un file \file{*.bib}, vediamo un esempio:
+In modo analogo anche il \eng{data model} di Bib\LaTeX, mutuato da quello di \hologo{BibTeX}, prevede dei campi obbligatori e altri facoltativi, a seconda della tipologia di documento (\textcite*[6--45]{biblatex}).
+Per capire come compilare manualmente un file \file{bib}, vediamo un esempio:
 \begin{lstlisting}[style=es]
 @book{lamport:latex,
 	location = {Reading, Mass. [etc.]},
@@ -224,41 +230,38 @@ La prima riga contiene due informazioni: la \emph{tipologia di documento}, inser
 
 
 Come si può vedere nell'esempio, ciascun campo è separato da virgole; la sintassi prevede questa formulazione:\\[1ex]
-%\begin{lstlisting}[style=cmd]
-%(*@$\langle$\textit{nome del campo}$\rangle$@*) = {(*@$\langle$\textit{contenuto del campo}$\rangle$@*)}
-%\end{lstlisting}
 \begin{tabularx}{\linewidth}{@{}X@{}}
-\toprule
+%\toprule
 \meta{nome del campo} = \Marg{\meta{contenuto del campo}}\\
-\bottomrule
+%\bottomrule
 \end{tabularx}\\[1ex]
 L'intero record, dopo l'indicazione della tipologia, è racchiuso tra parentesi graffe.
 
 Per quanto concerne il campo \texttt{edition}, \pack{biblatex} prevede che esso sia un numero intero, così verrà sfruttato il pacchetto \pack{babel} per inserire nel testo l'indicazione di edizione corretta secondo la lingua in uso, trasformando il numero in ordinale (che non va quindi inserito nel campo). Nel caso di indicazioni testuali di edizione, come, ad esempio, ``nuova edizione riveduta e corretta'', essa va inserita integralmente nel campo, così come desideriamo appaia nel testo: in questo caso, infatti, \pack{biblatex} riporta alla lettera il contenuto del campo senza applicare modifiche.
 
-Il campo \texttt{date} indica la data di pubblicazione. Per motivi di compatibilità con \hologo{BibTeX} viene mantenuto anche il campo \texttt{year}, ma la guida del pacchetto \pack{biblatex} consiglia di usare il campo \texttt{date}, che ha molte più funzioni. La data va inserita nel formato $\langle$\textit{anno--mese--giorno}$\rangle$, ad esempio \{\texttt{2018-12-31}\}. Il trattino separa sempre le scansioni temporali: l'anno dal mese dal giorno. È possibile inserire anche degli intervalli di date (sia chiusi che aperti), utilizzando la barra obliqua (o \emph{slash} in inglese), ad esempio: \{\texttt{1997/1998}\} viene riprodotto ``1997--1998'', mentre un intervallo aperto \{\texttt{1981/}\} diventa ``1981--''. L'argomento è trattato nel capitolo~2.3.8, ``Date and time specifications'', della guida al pacchetto \pack{biblatex} \parencite[37--39]{biblatex}.
+Il campo \texttt{date} indica la data di pubblicazione. Per motivi di compatibilità con \hologo{BibTeX} viene mantenuto anche il campo \texttt{year}, ma la guida del pacchetto \pack{biblatex} consiglia di usare il campo \texttt{date}, che ha molte più funzioni. La data va inserita nel formato $\langle$\textit{anno--mese--giorno}$\rangle$, ad esempio \{\texttt{2018-12-31}\}. Il trattino separa sempre le scansioni temporali: l'anno dal mese dal giorno. È possibile inserire anche degli intervalli di date (sia chiusi che aperti), utilizzando la barra obliqua (o \emph{slash} in inglese), ad esempio: \{\texttt{1997/1998}\} viene riprodotto ``1997--1998'', mentre un intervallo aperto \{\texttt{1981/}\} diventa ``1981--''. L'argomento è trattato nel capitolo~2.3.8, ``Date and time specifications'', della guida al pacchetto \pack{biblatex} (\textcite*[38--39]{biblatex}).
 
 È sempre preferibile utilizzare la tipologia più aderente al tipo di materiale, anche quando una risorsa si presenta in versione elettronica, come molte riviste pubblicate solo digitalmente. In questi casi, va usato \texttt{@article} inserendo nel campo \texttt{url}, che è supportato da tutte le tipologie, il link all'articolo sul sito dell'editore. Lo stesso discorso si applica per gli ebook. Quando vengono utilizzati materiali \emph{elettronici}, cioè risorse di cui è stata consultata una versione online, va utilizzato il campo \texttt{urldate} che indica la data dell'ultima visita alla risorsa: il campo è facoltativo per Bib\LaTeX, ma la norma ISO 690 lo indica come obbligatorio, ed è raccomandato dai manuali di bibliografia.
 
-\section{Creare un file \texttt{*.bib}}
-Molti \eng{shell editor} comprendono funzioni per la scrittura facilitata di un file \file{*.bib}, e con essi è possibile compilarlo manualmente senza troppe difficoltà. In questa operazione, tuttavia, i software di gestione bibliografica possono essere di grande aiuto: tramite di essi, infatti, oltre a poter gestire e organizzare i nostri riferimenti bibliografici, è possibile esportare facilmente i riferimenti utilizzati nel nostro lavoro.
+\section{I software per la gestione della bibliografia}\label{refman}
+Molti \eng{shell editor} comprendono funzioni per la scrittura facilitata di un file \file{bib}, e con essi è possibile compilarlo manualmente senza troppe difficoltà. In questa operazione, tuttavia, i software di gestione bibliografica possono essere di grande aiuto: tramite di essi, infatti, oltre a poter gestire e organizzare i nostri riferimenti bibliografici, è possibile esportare facilmente i riferimenti utilizzati nel nostro lavoro.
 
 Esula dallo scopo di questa guida elencare i diversi software, mettendone in evidenza caratteristiche comuni e differenze, per cui ci si limiterà a portare gli esempi di \prog{Zotero} e di \prog{Mendeley}, che sono i due software a cui il Sistema bibliotecario dell'Università degli studi di Padova fornisce supporto, a cui ho aggiunto il software \prog{Jabref}, che è progettato specificatamente per lavorare in \LaTeX\ e facilita di molto le operazioni di compilazione della bibliografia.
 
 \subsection{Zotero}
-Per creare un file \file{*.bib} con \prog{Zotero}, si consiglia di inserire tutti i riferimenti richiesti in un'unica cartella, quindi dall'applicazione desktop di \prog{Zotero}, fare click con il tasto destro sulla cartella, e selezionare la voce \verb!Esporta collezione!, a questo punto si apre una finestra che chiede di selezionare alcune impostazioni: come formato selezionare \texttt{biblatex}; secondo necessità è possibile esportare anche le note, che poi compariranno come commenti in bibliografia, come fatto in questa guida (\ref{bibnote}); infine come codifica caratteri selezionare \verb!UTF-8! (dovrebbe essere l'impostazione predefinita): questo permette di non dover modificare i vari caratteri speciali che compaiono nei riferimenti, visto che Bib\LaTeX, a differenza di \hologo{BibTeX} supporta tale codifica. Il nome predefinito del file che verrà creato è quello della cartella, consigliamo di dare lo stesso nome del file \file{*.tex} su cui vogliamo lavorare.
+Per creare un file \file{bib} con \prog{Zotero}, si consiglia di inserire tutti i riferimenti richiesti in un'unica cartella, quindi dall'applicazione desktop di \prog{Zotero}, fare click con il tasto destro sulla cartella, e selezionare la voce \verb!Esporta collezione!, a questo punto si apre una finestra che chiede di selezionare alcune impostazioni: come formato selezionare \texttt{biblatex}; secondo necessità è possibile esportare anche le note, che poi compariranno come commenti in bibliografia, come fatto in questa guida (\ref{bibnote}); infine come codifica caratteri selezionare \verb!UTF-8! (dovrebbe essere l'impostazione predefinita): questo permette di non dover modificare i vari caratteri speciali che compaiono nei riferimenti, visto che Bib\LaTeX, a differenza di \hologo{BibTeX} supporta tale codifica. Il nome predefinito del file che verrà creato è quello della cartella, consigliamo di dare lo stesso nome del file \file{tex} su cui vogliamo lavorare.
 
 L'architettura aperta di \prog{Zotero} permette l'integrazione con svariate estensioni: tramite di esse vengono introdotte migliorie e nuove funzioni, ed è possibile l'integrazione con altri programmi.%
 \footnote{Cfr. \url{https://www.zotero.org/support/plugins} per una lista delle estensioni disponibili.}
 All'utilizzatore di \LaTeX\ interesserà sicuramente l'estensione ``Better BibTeX'' che rende più facile e precisa l'esportazione di un database bibliografico per \hologo{BibTeX} o Bib\LaTeX. Per una descrizione del progetto si veda: \url{https://github.com/retorquere/zotero-better-bibtex} (Visitato il 27 giugno 2019).
 
 \subsection{Mendeley}
-Per creare un file \file{*.bib} con \prog{Mendeley}, si consiglia di inserire tutti i riferimenti richiesti in un'unica cartella, quindi dall'applicazione desktop di \prog{Mendeley}, entrare nella cartella e selezionare tutti i riferimenti, fare click con il tasto destro e selezionare la voce \verb!Export!. Il nome predefinito del file è \file{My Collection.bib}, si consiglia di utilizzare lo stesso nome del file \file{*.tex} su cui vogliamo lavorare. Come formato del file selezionare \texttt{BibTeX} (\file{*.bib}).
+Per creare un file \file{bib} con \prog{Mendeley}, si consiglia di inserire tutti i riferimenti richiesti in un'unica cartella, quindi dall'applicazione desktop di \prog{Mendeley}, entrare nella cartella e selezionare tutti i riferimenti, fare click con il tasto destro e selezionare la voce \verb!Export!. Il nome predefinito del file è \file{My Collection.bib}, si consiglia di utilizzare lo stesso nome del file \file{tex} su cui vogliamo lavorare. Come formato del file selezionare \texttt{BibTeX} (\file{bib}).
 
 \subsection{Jabref}
-Generalmente, un software di gestione della bibliografia utilizza un proprio database interno per memorizzare le informazioni relative ai record bibliografici di nostro interesse, ed è in grado di recuperare tali informazioni per fornirle secondo un formato specifico da noi selezionato: questa operazione viene chiamata solitamente \emph{esportazione}. Il grande vantaggio di \prog{Jabref} sugli altri software è che utilizza, come database interno dove salvare le informazioni, un file \file{*.bib} con il \eng{data model} di \hologo{BibTeX} o Bib\LaTeX, a seconda della scelta operata dall'utente. Questa caratteristica permette di non dover subire ``traduzioni'' di codici e linguaggi, bensì di lavorare direttamente nei campi previsti da Bib\LaTeX: il software ci segnalerà, a seconda della tipologia di documento, quali sono i campi obbligatori, e ci guiderà nella compilazione degli stessi. Inoltre è multi--piattaforma, e si integra con molti dei principali \eng{shell editor}. L'unico aspetto negativo, se confrontato con gli altri software, è che non possiede uno spazio di archiviazione in \eng{cloud} dove sincronizzare i nostri dati, così da poterlo utilizzare da più postazioni; per l'utilizzatore \LaTeX\ tuttavia, non è un problema insormontabile, basta tenere sempre assieme il file \file{*.tex} con quello \file{*.bib}, che sono solitamente file di piccole dimensioni e facilmente copiabili o inviabili via email.
+Generalmente, un software di gestione della bibliografia utilizza un proprio database interno per memorizzare le informazioni relative ai record bibliografici di nostro interesse, ed è in grado di recuperare tali informazioni per fornirle secondo un formato specifico da noi selezionato: questa operazione viene chiamata solitamente \emph{esportazione}. Il grande vantaggio di \prog{Jabref} sugli altri software è che utilizza, come database interno dove salvare le informazioni, un file \file{bib} con il \eng{data model} di \hologo{BibTeX} o Bib\LaTeX, a seconda della scelta operata dall'utente. Questa caratteristica permette di non dover subire ``traduzioni'' di codici e linguaggi, bensì di lavorare direttamente nei campi previsti da Bib\LaTeX: il software ci segnalerà, a seconda della tipologia di documento, quali sono i campi obbligatori, e ci guiderà nella compilazione degli stessi. Inoltre è multi--piattaforma, e si integra con molti dei principali \eng{shell editor}. L'unico aspetto negativo, se confrontato con gli altri software, è che non possiede uno spazio di archiviazione in \eng{cloud} dove sincronizzare i nostri dati, così da poterlo utilizzare da più postazioni; per l'utilizzatore \LaTeX\ tuttavia, non è un problema insormontabile, basta tenere sempre assieme il file \file{tex} con quello \file{bib}, che sono solitamente file di piccole dimensioni e facilmente copiabili o inviabili via email.
 
-\section{Controllare il file \texttt{*.bib}}
+\section{Controllare il file \texttt{bib}}
 Dopo aver creato il database, è importante effettuare una revisione dei dati inseriti, sia per evitare errori in fase di compilazione con \LaTeX, sia per migliorare la resa tipografica dei riferimenti bibliografici. Questa fase di controllo è particolarmente importante se il file è stato creato utilizzando un software, ma verranno trattati alcuni aspetti che è bene conoscere anche nel caso di una compilazione manuale.
 
 Partiamo con un esempio, creato con \prog{Zotero}:
@@ -280,9 +283,9 @@ Partiamo con un esempio, creato con \prog{Zotero}:
 Nella prima riga, dopo l'indicazione della tipologia di documento, è visibile l'etichetta generata automaticamente dal software (in inglese \eng{citekey}), \verb!lehman_biblatex_2018!: sarà con essa che il riferimento bibliografico verrà inserito nel testo tramite il comando \comando{\cite}, come descritto nella sezione~\ref{comandi}. Questa funzione dimostra tutta la sua utilità man mano che i riferimenti utilizzati si accumulano e diventano via via più numerosi. Quando i riferimenti sono pochi, è possibile rinominare le etichette in qualcosa di facile da memorizzare: una prassi comune è la sintassi \textit{$\langle$cognome$\rangle$:$\langle$parola significativa del titolo$\rangle$}, ad esempio \texttt{lehman:biblatex}, oppure la forma \textit{$\langle$cognome$\rangle\langle$anno$\rangle$}, che è anche utilizzata da \prog{jabref}: l'esempio di prima diventa \texttt{lehman2018}. È necessario che ciascuna etichetta sia univoca, altrimenti la compilazione si interromperà segnalando l'errore nel file di log: tutti i software qui menzionati svolgono un eccellente lavoro nell'evitare duplicati, ed è un ulteriore buon motivo per delegare a loro il compito di assegnare le etichette.
 
 Di frequente sono necessarie alcune modifiche per ripulire i campi dai caratteri speciali utilizzati dai database da cui sono stati importati, o anche semplicemente per migliorare la resa tipografica dei riferimenti. Vediamo un esempio: il campo titolo è esportato da catalogo come \verb*!<<The >>LaTeX Companion!. In questo caso vanno eliminate le doppie parentesi uncinate che delimitano l'articolo.
-Questo tipo di modifica, assieme all'inserimento delle note (\ref{bibnote}), si può fare nel file \file{*.bib}, ma consiglio di farlo direttamente all'interno del software di gestione bibliografica, così otterremo dei riferimenti puliti e pronti per essere utilizzati ripetutamente. Una modifica che invece è preferibile fare nel file \file{*.bib} è l'inserimento del comando \comando{\LaTeX} così da visualizzare correttamente il logo \LaTeX\ anche nei riferimenti e in bibliografia.\footnote{Ho rilevato, infatti, che i software proteggono il carattere speciale \textbackslash\ (\eng{backslash}), inserendo al suo posto il comando \cs{textbackslash} per visualizzare il segno corrispondente: il risultato è che in bibliografia compare il nome del comando che si voleva utilizzare, e non il logo.}
+Questo tipo di modifica, assieme all'inserimento delle note (\ref{bibnote}), si può fare nel file \file{bib}, ma consiglio di farlo direttamente all'interno del software di gestione bibliografica, così otterremo dei riferimenti puliti e pronti per essere utilizzati ripetutamente. Una modifica che invece è preferibile fare nel file \file{bib} è l'inserimento del comando \comando{\LaTeX} così da visualizzare correttamente il logo \LaTeX\ anche nei riferimenti e in bibliografia.\footnote{Ho rilevato, infatti, che i software proteggono il carattere speciale \textbackslash\ (\eng{backslash}), inserendo al suo posto il comando \cs{textbackslash} per visualizzare il segno corrispondente: il risultato è che in bibliografia compare il nome del comando che si voleva utilizzare, e non il logo.}
 
-Un errore frequente che appare al momento della compilazione è dovuto all'uso, nel database bibliografico, di caratteri speciali riservati a funzioni specifiche di \LaTeX, come, ad esempio, il carattere ``\&'', che può comparire nel campo degli autori o del titolo: in \LaTeX\ è un cosiddetto \emph{carattere speciale}, il cui uso è riservato per separare le celle di una tabella. Per poter essere utilizzato all'interno del testo, va scritto con il suo comando apposito \comando{\&}. 
+Un errore frequente che appare al momento della compilazione è dovuto all'uso, nel database bibliografico, di caratteri speciali riservati a funzioni specifiche di \LaTeX, come, ad esempio, il carattere ``\&'', che può comparire nel campo degli autori o del titolo: in \LaTeX\ è un cosiddetto \emph{carattere speciale}, il cui uso è riservato per separare le celle di una tabella. Come tutti i caratteri speciali, per poter essere utilizzato all'interno del testo, va scritto con il suo comando apposito \comando{\&}. 
 
 Altri errori riguardano per lo più i campi \texttt{autore} e \texttt{titolo}; nel primo caso se l'autore è un nome collettivo, come \textenglish{``Institute of Electrical Engineers''}, \hologo{BibTeX} potrebbe interpretare che \textenglish{``Institute''} è il nome proprio dell'autore, e \textenglish{``of Electrical Engineers''} il cognome. Per correggere questo comportamento, è sufficiente inserire tra virgolette il campo autore, o tra doppie graffe (solo in Bib\LaTeX). La stessa soluzione è valida anche quando un acronimo viene restituito solo con l'iniziale maiuscola e le altre lettere in minuscolo.
 
@@ -291,31 +294,24 @@ Tutti questi problemi dovrebbero essere gestiti in fase di esportazione dal soft
 
 \chapter{\textsc{Bib}\LaTeX}
 Una volta terminate le operazioni sul file con il database bibliografico, si può procedere all'inserimento dei riferimenti bibliografici nel documento. Innanzitutto, va caricato il pacchetto \pack{biblatex}, inserendo queste righe nel preambolo:\\[1ex]
-%\begin{lstlisting}[style=cmd]
-%\usepackage[backend=biber,style=(*@$\langle$\textit{nome dello stile}$\rangle$@*)]{biblatex}
-%\(*@\texttt{addbibresource}@*){(*@$\langle$\textit{nome file}$\rangle$@*).bib}
-%\end{lstlisting}
-%
 \begin{tabularx}{\linewidth}{@{}X@{}}
 \toprule
 \cs{usepackage}\Oarg{backend=biber, style=\meta{nome dello stile}}\Marg{biblatex}\\
 \cs{addbibresource}\Marg{\meta{nome file}.bib}\\
 \bottomrule
 \end{tabularx}\\[1ex]
-La prima opzione specifica quale programma esterno usare, \prog{biber} è l'opzione di default, consigliata anche nella guida del pacchetto \parencite[45]{biblatex}, anche se è mantenuto il supporto a \prog{bibtex}, nelle due versioni \prog{bibtex} e \prog{bibtex8}, mentre è abbandonato il supporto a \prog{bibtexu}. L'opzione \texttt{style} va compilata con il nome dello \emph{stile citazionale} che si vuole adottare. \pack{biblatex} prevede cinque stili predefiniti (con alcune varianti), indicati nel capitolo~3.3 della guida \parencite[68--73]{biblatex}:
-%\renewcommand{\plaindescriptionlabel}[1]{\hspace*{\labelsep}\textbf{\texttt{#1}}}
+La prima opzione specifica quale programma esterno usare, \prog{biber} è l'opzione di default, consigliata anche nella guida del pacchetto (\textcite*[46]{biblatex}), anche se è mantenuto il supporto a \prog{bibtex}, nelle due versioni \prog{bibtex} e \prog{bibtex8}, mentre è abbandonato il supporto a \prog{bibtexu}. L'opzione \texttt{style} va compilata con il nome dello \emph{stile citazionale} che si vuole adottare. \pack{biblatex} prevede cinque stili predefiniti (con alcune varianti, più tre stili speciali), indicati nel capitolo~3.3 della guida \parencite[73--78]{biblatex}:
 \begin{description}%[before={\renewcommand\makelabel[1]{\bfseries{\ttfamily{##1}}}}]
 \item[numeric]I riferimenti appaiono solo con un etichetta numerica (1).
 \item[alphabetic]Stile simile al precedente, ma l'etichetta è composta dalle prime lettere del cognome dell'autore e le ultime due cifre dell'anno di pubblicazione [Lam94].
 \item[authoryear]Il riferimento è costituito dal cognome dell'autore e dall'anno di pubblicazione (Lamport, 1994).
-\item[authortile]Il riferimento riporta il cognome dell'autore e il titolo, senza parentesi: Lamport, \LaTeX: a document preparation system.
+\item[authortile]Il riferimento riporta il cognome dell'autore e il titolo, senza parentesi (usando l'abbreviazione del titolo nel campo \texttt{shorttitle} se disponibile): Lamport, \LaTeX.
 \item[verbose]Il riferimento appare per intero, solitamente inserito in nota a piè di pagina.
 \end{description}
-Per \pack{biblatex} ciascuno stile è in realtà doppio: uno che gestisce i riferimenti bibliografici nel testo (salvato in un file \file{*.cbx}) e uno che gestisce la bibliografia (file \file{*.bbx}). Ovviamente i due devono coincidere, altrimenti diverrebbe difficile decifrare la bibliografia: è evidente con lo stile \texttt{numeric}, dove la bibliografia deve essere ordinata secondo l'ordine di apparizione dei riferimenti nel testo, e riportare le etichette numeriche di ciascun riferimento.
+Per \pack{biblatex} ciascuno stile è in realtà doppio: uno che gestisce i riferimenti bibliografici nel testo (salvato in un file \file{cbx}) e uno che gestisce la bibliografia (file \file{bbx}). Ovviamente i due devono coincidere, altrimenti diverrebbe difficile decifrare la bibliografia: è evidente con lo stile \texttt{numeric}, dove la bibliografia deve essere ordinata secondo l'ordine di apparizione dei riferimenti nel testo, e riportare le etichette numeriche di ciascun riferimento.
 
 \section{Stili citazionali e pacchetti}\label{stili}
 Oltre agli stili interni, è possibile caricare uno stile esterno, semplicemente dichiarando il nome del pacchetto nelle opzioni di \pack{biblatex}, come se fosse uno stile interno (l'unica differenza è che il pacchetto desiderato deve essere stato installato precedentemente). Qui di seguito si elencano alcuni degli stili disponibili, ma si rimanda nuovamente al \emph{topic} ``biblatex'' su \href{https://ctan.org/topic/biblatex}{CTAN} per una lista esaustiva.
-%\renewcommand{\descriptionlabel}[1]{\hspace*{\labelsep}\textbf{\pack{#1}}}
 \begin{description}[before={\renewcommand\makelabel[1]{\pack{##1}}}]
 \item[\href{https://ctan.org/pkg/biblatex-apa}{biblatex-apa}]Stile che rispecchia fedelmente le indicazioni del manuale APA \textenglish{(American Psycological Association)}, 6\textsuperscript{a} edizione.
 \item[\href{https://ctan.org/pkg/biblatex-chem}{biblatex-chem}]Pacchetto che racchiude più stili, utili per la chimica:%
@@ -334,39 +330,42 @@ Oltre agli stili interni, è possibile caricare uno stile esterno, semplicemente
 \item[\href{https://ctan.org/pkg/oscola}{oscola}]Stile basato sull'\eng{Oxford Standard for the Citation of Legal Authorities} (OSCOLA), 4\textsuperscript{a} edizione, utilizzato in ambito giuridico.
 \item[\href{https://ctan.org/pkg/windycity}{windycity}]Pacchetto che supporta vari stili in accordo al \eng{Chicago Manual of Style}, 17\textsuperscript{a} edizione.
 \end{description}
-Uno volta stabilito lo stile che si intende utilizzare, nel preambolo del file \file{*.tex} può essere necessario caricare anche questi altri pacchetti:\\[1ex]
-%\begin{lstlisting}[style=cmd]
-%\usepackage[((*@$\langle$\textit{lingua secondaria}$\rangle$@*),)(*@$\langle$\textit{lingua principale}$\rangle$@*)]{babel}
-%\usepackage[autostyle,italian=guillemets]{csquotes}
-%\end{lstlisting}
+Uno volta stabilito lo stile che si intende utilizzare, nel preambolo del file \file{tex} è preferibile caricare anche questi altri pacchetti:\\[1ex]
 \begin{tabularx}{\linewidth}{@{}X@{}}
 \toprule
 \cs{usepackage}\Oarg{(\meta{lingua secondaria},)\meta{lingua principale}}\Marg{babel}\\
-\cs{usepackage}\Oarg{autosyle,italian=guillemets}\Marg{csquotes}\\
+\cs{usepackage}\Oarg{autostyle,italian=guillemets}\Marg{csquotes}\\
 \bottomrule
 \end{tabularx}\\[1ex]
-Il pacchetto \pack{babel} presenta numerose funzioni, che permettono di impostare svariati aspetti tipografici secondo la lingua desiderata. Inoltre, viene sfruttato anche da Bib\LaTeX\ per creare i riferimenti bibliografici e la bibliografia secondo le norme in uso nel paese corrispondente. Pertanto si consiglia di caricarlo sempre, si veda anche la \href{https://ctan.org/pkg/babel}{documentazione del pacchetto} su CTAN, o usando il comando \texttt{texdoc babel}, disponibile sia in \textsf{\TeX\ Live} che in \textsf{MiK\TeX}.
+Il pacchetto \pack{babel} si occupa di impostare svariati aspetti tipografici per comporre il documento nella lingua specificata. Inoltre, viene sfruttato anche da \pack{biblatex} per creare i riferimenti bibliografici e la bibliografia secondo le norme in uso nel paese corrispondente. Di norma andrebbe sempre caricato se la lingua principale del documento non è l'inglese o se si utilizzano porzioni significative di testo in altre lingue. La \href{https://ctan.org/pkg/babel}{documentazione del pacchetto} è disponibile su CTAN, o usando il comando \texttt{texdoc babel}, disponibile sia in \textsf{\TeX\ Live} che in \textsf{MiK\TeX}.
 
 Il pacchetto \pack{csquotes} invece, sfruttando sempre le funzionalità di \pack{babel}, permette di adattare automaticamente le virgolette secondo la lingua in uso. L'esempio mostrato è adatto per un documento in italiano, come utilizzato in questa guida.
+
+Esiste anche il pacchetto \pack{polyglossia}, che in alcuni casi può essere una valida alternativa a \pack{babel}. I comandi da inserire nel preambolo sono un po' diversi, e seguono questo schema:\\[1ex]
+\begin{tabularx}{\linewidth}{@{}X@{}}
+\toprule
+\cs{usepackage}\Marg{polyglossia}\\
+\cs{setmainlanguage}\marg{lingua principale}\\
+\cs{setotherlanguages}\marg{lingue secondarie}\\
+\bottomrule
+\end{tabularx}
+
 
 \section{Comandi per i riferimenti bibliografici}\label{comandi}
 Il comando più comune per inserire un riferimento bibliografico è \comando{\cite}, seguito dall'etichetta del riferimento che si vuole inserire.
 
-Analogamente, il comando \comando{\nocite} manda in bibliografia un riferimento bibliografico senza che questo compaia nel testo. Se usato con la sintassi \comando{\nocite{*}} inserirà in bibliografia \emph{tutti} i riferimenti contenuti nel file \file{*.bib}.
+Analogamente, il comando \comando{\nocite} manda in bibliografia un riferimento bibliografico senza che questo compaia nel testo. Se usato con la sintassi \comando{\nocite}\Marg{*} inserirà in bibliografia \emph{tutti} i riferimenti contenuti nel file \file{bib}.
 
 Oltre a questi due comandi, \pack{biblatex} ne definisce degli altri per ottenere dei risultati differenti.
-\begin{itemize}
-\item \comando{\textcite} quando il riferimento bibliografico è parte integrante del discorso;
-\item \comando{\parencite} per inserire il riferimento tra parentesi;
-\item \comando{\footcite} per creare il riferimento in nota a piè di pagina;
-\item \comando{\supercite} negli stili numerici inserisce il riferimento in apice;
-\item \comando{\fullcite} riporta il riferimento bibliografico per intero.
-\end{itemize}
+\begin{description}
+\item [\comando{\textcite}] quando il riferimento bibliografico viene usato come parte integrante del discorso;
+\item [\comando{\parencite}] per inserire il riferimento tra parentesi;
+\item [\comando{\footcite}] per creare il riferimento in nota a piè di pagina;
+\item [\comando{\supercite}] negli stili numerici inserisce il riferimento in apice;
+\item [\comando{\fullcite}] riporta il riferimento bibliografico per intero.
+\end{description}
 
 Tutti questi comandi seguono una sintassi a tre argomenti, uno obbligatorio, tra parentesi graffe, che è la chiave che rimanda al record bibliografico, e due opzionali, tra parentesi quadre, che possono essere utilizzati per specificare delle informazioni:\\[1ex]
-%\begin{lstlisting}[style=cmd]
-%(*@\texttt{\textbackslash comando}@*)[(*@$\langle$\textit{prenote}$\rangle$@*)][(*@$\langle$\textit{postnote}$\rangle$@*)]{(*@$\langle$\textit{chiave}$\rangle$@*)}
-%\end{lstlisting}
 \begin{tabularx}{\linewidth}{@{}X@{}}
 \toprule
 \cs{comando}\Oarg{\meta{prenote}}\Oarg{\meta{postnote}}\Marg{\meta{chiave}}\\
@@ -377,28 +376,20 @@ La prima opzione specifica del testo da inserire prima del riferimento, come, ad
 Si faccia attenzione che i comandi e gli argomenti opzionali appena descritti sono quelli previsti da \pack{biblatex}, ma se si utilizzano dei pacchetti di stile come quelli illustrati nella sottosezione~\ref{stili}, può capitare che alcuni comandi funzionino in maniera differente, o non siano affatto supportati. In questi casi, va fatto riferimento alla documentazione del pacchetto, facilmente consultabile utilizzando il comando \textsf{texdoc} in una finestra con prompt dei comandi, console o terminale (ogni sistema operativo sembra utilizzare un nome diverso), assieme al nome del pacchetto: per consultare la (corposa) guida di \pack{biblatex}, ad esempio, basta quindi digitare: \texttt{texdoc biblatex}. 
 \section{Generare la bibliografia e comporre il documento}\label{printbib}
 La bibliografia viene prodotta dal comando \comando{\printbibliography}, con relativo titolo (e testatina se la classe di documento è \texttt{book}). Per inserire il titolo nell'indice generale va aggiunta l'opzione specifica al comando, in questo modo:\\[1ex]
-%\begin{lstlisting}[style=es,language=TeX]
-%\printbibliography[heading=bibintoc]
-%\end{lstlisting}
 \begin{tabularx}{\linewidth}{@{}X@{}}
 \toprule
 \cs{printbibliography}\Oarg{heading=bibintoc}\\
 \bottomrule
 \end{tabularx}\\[1ex]
-che funziona per tutte le classi principali, come \texttt{article}, \texttt{report} e \texttt{book}. 
+che funziona per tutte le classi principali, come \texttt{article}, \texttt{report} e \texttt{book}.
+
+\label{bibname}
+Il titolo predefinito in italiano per la bibliografia è ``Bibliografia'', che nella maggior parte dei casi va bene così com'è, ma se servisse cambiarlo, nell'argomento opzionale è possibile inserire anche l'opzione \chiave{title} con il suo valore racchiuso tra graffe, per inserire il titolo che preferiamo.
 
 Una volta terminata la scrittura di un documento, per poter visualizzare correttamente la bibliografia e i riferimenti, bisogna effettuare almeno questi quattro passaggi:%
-%\footnote{Per questa sezione e per la figura corrispondente ci siamo basati sull'articolo:\\%
-%\href{https://tex.stackexchange.com/questions/25701/bibtex-vs-biber-and-biblatex-vs-natbib}{\texttt{https://tex.stackexchange.com/questions/25701/bibtex-vs-biber-and-biblatex\discretionary{}{-}{-}vs-natbib}} Visitato il 21 maggio 2019, e sulle preziose indicazioni di Claudio Beccari che ha aiutato a distinguere i processi in atto in ciascun passaggio.}
 \footnote{La spiegazione che segue è stata elaborata a partire dall'articolo:\\%
 \href{https://tex.stackexchange.com/questions/25701/bibtex-vs-biber-and-biblatex-vs-natbib}{\texttt{https://tex.stackexchange.com/questions/25701/bibtex-vs-biber-and-biblatex\discretionary{}{-}{-}vs-natbib}} Visitato il 21 maggio 2019. È stato poi integrato con la documentazione del pacchetto \pack{biblatex} e, soprattutto, l'aiuto di Claudio Beccari.}
-\begin{enumerate}
-\item compilare il documento con \LaTeX\footnote{In questa sede si indica con \LaTeX\ uno dei programmi utilizzati per la compilazione, come \prog{pdflatex}, \prog{xelatex} o \prog{lualatex}, che eseguono la compilazione utilizzando nel formato compilato contenuto, rispettivamente in \file{pdflatex.fmt}, \file{xelatex.fmt} e \file{lualatex.fmt}. Sta all'autore decidere quale sia meglio utilizzare per il proprio documento.} una prima volta: assieme al file pdf, vengono generati due file, uno \file{*.aux} che contiene le etichette dei riferimenti bibliografici utilizzati, e uno \file{*.bcf}, che contiene una serie di istruzioni di configurazione per l'esecuzione di \prog{biber} secondo le impostazioni stabilite nel preambolo (vale a dire il pacchetto di stile caricato e eventuali opzioni manualmente inserite) assieme alle etichette dei riferimenti inseriti con i comandi \cs{cite} e affini;
-\item eseguire il programma \prog{biber} così da fargli leggere il database bibliografico sulla base delle richieste contenute nel file \file{*.bcf}; esso produrrà un file \file{*.bbl} che contiene le istruzioni per \LaTeX per inserire le informazioni bibliografiche nel documento;
-\item compilare nuovamente il documento con \LaTeX, il quale legge il file \file{*.aux} e quello \file{*.bbl} appena prodotto, e riscrive il file \file{*.aux} con le nuove informazioni ottenute. Nel file pdf viene inserita la bibliografia, e le etichette vengono sostituite dai riferimenti bibliografici secondo lo stile scelto. Mancano ancora alcuni riferimenti incrociati, perché non erano presenti nel file \file{*.aux} iniziale, come, ad esempio, quelli che fanno riferimento alla bibliografia;
-\item una ulteriore compilazione con \LaTeX\ permetterà al compilatore di leggere il file \file{*.aux} aggiornato e di inserire i riferimenti mancanti.
-\end{enumerate}
-Il procedimento è illustrato nella figura~\ref{fig:1}.
+
 \begin{figure}[!htb]
 \centering
 \unitlength=0.01\textwidth
@@ -410,13 +401,23 @@ Il procedimento è illustrato nella figura~\ref{fig:1}.
 \medskip
 \small
 \begin{compactdescription}
-\item[\colorbox{red!20}{rosa}]Sono i file di origine (\file{*.tex} e \file{*.bib}) e quelli finali (PDF e i file di log)
+\item[\colorbox{red!20}{rosa}]Sono i file di origine (\file{tex} e \file{bib}) 
+\item[\colorbox{orange!20}{arancio}]Sono i file di output (PDF e i file di log)
 \item[\colorbox{green!20}{verde}]I file del pacchetto di stile
 \item[\colorbox{blue!20}{blu}]I due programmi utilizzati nella compilazione
 \item[\colorbox{black!15}{area grigia}]Indica i file che servono alla compilazione della bibliografia
 \end{compactdescription}
 \label{fig:1}
 \end{figure}
+
+\begin{enumerate}
+\item compilare il documento con \LaTeX\footnote{In questa sede si indica con \LaTeX\ uno dei programmi di composizione, come \prog{pdflatex}, \prog{xelatex} o \prog{lualatex}, che si basano sul linguaggio \LaTeX. Sta all'autore decidere quale sia meglio utilizzare per il proprio documento.} una prima volta: assieme al file pdf, vengono generati due file, uno \file{aux} che contiene le etichette dei riferimenti bibliografici utilizzati, e uno \file{bcf}, che contiene una serie di istruzioni di configurazione per l'esecuzione di \prog{biber} secondo le impostazioni stabilite nel preambolo (vale a dire il pacchetto di stile caricato e eventuali opzioni manualmente inserite) assieme alle etichette dei riferimenti inseriti con i comandi \cs{cite} e affini;
+\item eseguire il programma \prog{biber} così da fargli leggere il database bibliografico sulla base delle richieste contenute nel file \file{bcf}; esso produrrà un file \file{bbl} che contiene le istruzioni per \LaTeX\ per inserire le informazioni bibliografiche nel documento;
+\item compilare nuovamente il documento con \LaTeX, il quale legge il file \file{aux} e quello \file{bbl} appena prodotto, e riscrive il file \file{aux} con le nuove informazioni ottenute. Nel file pdf viene inserita la bibliografia, e le etichette vengono sostituite dai riferimenti bibliografici secondo lo stile scelto. Mancano ancora alcuni riferimenti incrociati, perché non erano presenti nel file \file{aux} iniziale, come, ad esempio, quelli che fanno riferimento alla bibliografia;
+\item una ulteriore compilazione con \LaTeX\ permetterà al compilatore di leggere il file \file{aux} aggiornato e di inserire i riferimenti mancanti.
+\end{enumerate}
+Il procedimento è illustrato nella figura~\ref{fig:1}.
+
 
 In alcuni casi, il file di log del quarto passaggio può riportare uno dei seguenti messaggi (o entrambi):
 \begin{lstlisting}[%
@@ -439,9 +440,9 @@ In questo caso è necessario effettuare un quinto passaggio, sempre con \LaTeX, 
 
 
 \section{Bibliografia commentata}\label{bibnote}
-Tutti i principali software  prevedono un campo ``note'' dove inserire i commenti ai riferimenti bibliografici, e, quando si effettua l'esportazione su file \file{*.bib}, è possibile esportare anche tale campo. In Bib\LaTeX\ il campo si chiama \texttt{annotation}, retro--compatibile con il campo \texttt{annote} di \hologo{BibTeX}.%
+Tutti i principali software  prevedono un campo ``note'' dove inserire i commenti ai riferimenti bibliografici, e, quando si effettua l'esportazione su file \file{bib}, è possibile esportare anche tale campo. In Bib\LaTeX\ il campo si chiama \texttt{annotation}, retro--compatibile con il campo \texttt{annote} di \hologo{BibTeX}.%
 \footnote{In Bib\LaTeX\ il campo \texttt{annote} è lo \eng{short name} per il campo \texttt{annotation} per cui si possono utilizzare indifferentemente.}
-Per far comparire in bibliografia i commenti, a seconda dello stile utilizzato può essere sufficiente inserire l'opzione corrispondente al momento di caricare il pacchetto \pack{biblatex}: per lo stile \pack{windycity} utilizzato in questa guida è \verb!annotate=true!. Si faccia sempre riferimento alla documentazione dello stile, consultabile con il comando \texttt{texdoc} \meta{nome pacchetto} da prompt dei comandi, per sapere se è implementata la stampa del campo \texttt{annotation} e come impostarla. Se invece lo stile scelto non prevede la stampa di tale campo, si può usare la soluzione proposta da Daniel Fowler \parencite{mendeley}, inserendo le seguenti istruzioni nel preambolo:
+Per far comparire in bibliografia i commenti, a seconda dello stile utilizzato può essere sufficiente inserire l'opzione corrispondente al momento di caricare il pacchetto \pack{biblatex}: per lo stile \pack{windycity} utilizzato in questa guida è \chiave{annotate=true}. Si faccia sempre riferimento alla documentazione dello stile, consultabile con il comando \texttt{texdoc} \meta{nome pacchetto} da prompt dei comandi, per sapere se è implementata la stampa del campo \texttt{annotation} e come impostarla. Se invece lo stile scelto non prevede la stampa di tale campo, si può usare la soluzione proposta da Daniel Fowler \parencite{mendeley}, inserendo le seguenti istruzioni nel preambolo:
 \begin{lstlisting}[%
 	style=es,
 	%language=TeX%
@@ -460,12 +461,178 @@ Se l'operazione va a buon fine, si otterrà un risultato simile alla bibliografi
 
 Si faccia attenzione a non confondere il campo \texttt{annotation} con il campo \texttt{note}, previsto sia da \hologo{BibTeX} che da Bib\LaTeX. Il primo serve, come abbiamo visto, a inserire dei commenti ai riferimenti bibliografici che saranno visibili in bibliografia; il secondo invece è un campo a disposizione per inserire delle informazioni bibliografiche che non possono essere inserite in altri campi, un caso tipico è quello delle ristampe anastatiche. A scopo esemplificativo, si veda la voce \emph{I promessi sposi} \parencite{sposi}, inserita nella lista di opere consultate a pagina~\pageref{bib2}.
 
+\section{Bibliografie multiple e suddivise}
+Esistono diverse situazioni in cui è desiderabile avere più di una bibliografia: dotare ciascun capitolo di una propria bibliografia, creare bibliografie tematiche alla fine di un manuale, bibliografie suddivise per tipologia di documento, per lingua, in originale o in traduzione, e così via. In questa guida, ad esempio, ho inserito in una bibliografia tutte le opere specifiche per \LaTeX, e in una seconda tutte le opere più generali riguardanti la disciplina della Bibliografia.
+
+Il pacchetto \pack{biblatex} è molto versatile su questo aspetto e mette a disposizione molti strumenti che ci permettono di gestire e configurare una o più bibliografie, o di stabilirne eventuali sezionamenti. Le casistiche e le possibilità sono troppe per pretendere di illustrare una lista esaustiva: ci limiteremo a mostrare alcuni esempi, richiamando alcuni dei comandi provvisti da \pack{biblatex} per lo scopo, starà poi al lettore individuare quale struttura dare al proprio lavoro e utilizzare gli strumenti ritenuti più opportuni.
+
+\subsection{Bibliografie multiple: una per capitolo}
+Le pubblicazioni come gli atti di convegni o le raccolte di saggi solitamente richiedono che ciascun capitolo o intervento abbia la propria bibliografia. Questa operazione è abbastanza semplice grazie all'ambiente \amb{refsection}.\\[1ex]
+\begin{tabularx}{\linewidth}{@{}X@{}}
+\toprule
+\Bambiente{refsection}\oarg{risorsa.bib}\\
+\cs{cite}\marg{\ldots}\\
+\ldots\\
+\cs{printbibliography}\Oarg{heading$=$subbibliography}\\
+\Eambiente{refsection}\\
+\bottomrule
+\end{tabularx}\\[1ex]
+L'ambiente crea una sezione virtuale di documento che separa i riferimenti bibliografici in esso contenuti dal resto del documento. Quando inseriamo il comando \cs{printbibliography} al suo interno, si produce una bibliografia contenente solo i riferimenti bibliografici richiamati nella sezione. Si noti che l'apertura dell'ambiente accetta un argomento opzionale dove è possibile specificare un database bibliografico che verrà usato solo all'interno di questa sezione virtuale; funzione utilissima quando si lavora tra più autori.
+
+È importante specificare nell'argomento l'intestazione (\eng{heading}), così che il titolo della bibliografia venga creato con il giusto livello di sezionamento: normalmente viene creata con \cs{chapter}, ma all'interno di un capitolo, se viene specificata l'opzione, verrà creata come \cs{section}, come spiegato nel paragrafo~3.7.7 di \textcite*[95--97]{biblatex}.
+
+La guida specifica che tecnicamente una \amb{refsection} non deve necessariamente coincidere con una suddivisione del nostro documento, ma ne può essere completamente slegata; probabilmente però l'uso più pratico è di farla effettivamente coincidere con un capitolo per una classe come  \texttt{book} e con una sezione per classi come \texttt{article}.
+
+\subsection{Bibliografia unica suddivisa in sezioni}
+Libri di testo come un manuale, potrebbero beneficiare di un'unica bibliografia a fine volume, ma suddivisa in sezioni, relative, ad esempio, a ciascun capitolo. Per ottenerla, si può utilizzare un altro ambiente, simile al precedente, che si chiama \amb{refsegment}. Un documento dovrebbe essere strutturato più o meno in questo modo:\\[1ex]
+\begin{tabularx}{\linewidth}{@{}X@{}}
+\toprule
+\meta{preambolo}\\
+\Bambiente{document}\\
+\cs{chapter}\marg{\ldots}\\
+\Bambiente{refsegment}\\
+\ldots\\
+\Eambiente{refsegment}\\
+\cs{chapter}\marg{\ldots}\\
+\Bambiente{refsegment}\\
+\ldots\\
+\Eambiente{refsegment}\\
+\cs{printbibheading}\\
+\cs{printbibliography}\Oarg{segment=1,heading=subbibliography}\\
+\cs{printbibliography}\Oarg{segment=2,heading=subbibliography}\\
+\Eambiente{document}\\
+\bottomrule
+\end{tabularx}\\[1ex]
+Il contenuto di ciascun capitolo è stato racchiuso nell'ambiente \amb{refsegment}. La differenza tra \amb{refsection} e \amb{refsegment} è che il primo crea dei sezionamenti che sono isolati dal resto del documento e le etichette generate rimangono locali all'interno dell'ambiente, mentre il secondo non interferisce nel processo di creazione delle etichette, e quindi tutte saranno univoche nell'intero documento (\textcite*[cfr.~3.7.5 ``Bibliography Segments''][94--95]{biblatex}).
+
+Si faccia attenzione invece ai comandi usati per generare la bibliografia: il primo comando \cs{printbibheading} serve a inserire l'intestazione, di norma ``Bibliografia'', come visto a p.~\pageref{bibname}. I successsivi \cs{printbibliography} creano delle bibliografie relative al segmento indicato nell'argomento opzionale; la seconda opzione modifica l'intestazione di queste bibliografie in una di livello più basso. Senza altri interventi tutte le \chiave{subbibliography} hanno l'intestazione ``Riferimenti bibliografici'', che non è molto utile perché non si sa a quale capitolo esse facciano riferimento. La soluzione è quella di ridefinire l'intestazione, inserendo questo comando nel preambolo del nostro documento, come spiegato anche in \textcite*[136]{biblatex}:
+\begin{lstlisting}[%
+	style=es,
+	%language=TeX%
+	]
+\usepackage{biblatex}
+\defbibheading{subbibliography}{%
+	\section*{\refname\ del capitolo \ref{%
+		refsegment:\therefsection\therefsegment}}}
+\end{lstlisting}
+Questo comando definisce l'intestazione delle sotto-bibliografie in questo modo: ``Riferimenti bibliografici del capitolo \meta{n. capitolo}''. Il comando \cs{refname} richiama la stringa \eng{references}, usata come nome predefinito per le sotto-bibliografie e tradotto da \pack{babel} in ``riferimenti bibliografici''. Analogamente è disponibile \cs{bibname} per la stringa ``bibliography'' usata per la bibliografia principale (\textcite*[vedi][272]{biblatex}).
+
+Effettuata questa operazione, ciascuna sotto-bibliografia avrà un'intestazione significativa. Se i capitoli sono molto numerosi, non è necessario ripetere più e più volte la stessa sequenza di comandi per l'apertura degli ambienti e i \cs{printbibliography} a fine documento, rischiando, se non l'errore, la noia di sicuro: \pack{biblatex}, infatti, mette a disposizione un paio di strumenti per automatizzare le operazioni. Quando carichiamo il pacchetto, se usiamo l'opzione \texttt{refsegment=}\meta{livello di sezionamento del documento}, otterremo che ciascun comando di sezionamento per il livello indicato creerà automaticamente un \texttt{refsegment} corrispondente. Dopo di che, il comando \cs{bibbysegment} passa in rassegna tutti i sezionamenti presenti nel documento, ed esegue la stessa operazione di tanti \cs{printbibliography} messi in sequenza. Per produrre tutta la bibliografia sezionata sono sufficienti questi comandi (\textcite*[cfr.][53, 90]{biblatex}):\\[1ex]
+\begin{tabularx}{\linewidth}{@{}X@{}}
+\toprule
+\cs{usepackage}\Oarg{refsegment=chapter, style=\meta{stile}}\Marg{biblatex}\\
+\ldots\\
+\cs{printbibheading}\\
+\cs{bibbysegment}\Oarg{heading=subbibliography}\\
+\bottomrule
+\end{tabularx}\\[1ex]
+Questo per la classe \texttt{book} crea un nuovo \eng{reference segment} per ciascun capitolo, e crea una bibliografia suddivisa in tante sezioni corrispondenti ai nostri capitoli.
+ 
+Analogamente, possiamo usare anche l'opzione \texttt{refsection} e il comando \cs{bibbysection} per creare automaticamente le bibliografie alla fine di ciascun capitolo come visto nella sezione precedente.
+
+\subsection{Bibliografia unica suddivisa per categorie}
+Capita spesso di dover suddividere la bibliografia secondo altri criteri, a seconda dell'ambito disciplinare o del tipo di documento che si vuole scrivere. Ad esempio, si potrebbe voler distinguere le fonti primarie da quelle secondarie, o le opere di un autore in lingua originale da quelle in traduzione, o le fonti cartacee da quelle online, o i libri dalle riviste e da altri tipi di supporto. Le possibilità, com'è ovvio, sono numerosissime: quella che segue è solo una carrellata delle opzioni messe a disposizione da \pack{biblatex}, come mostrato anche nella sezione~3.13.4 di \textcite*[137--139]{biblatex}.
+
+Tutti gli esempi del capoverso precedente si possono ottenere mediante un uso accorto delle opzioni del comando \cs{printbibliography}, in particolare \chiave{type}, \chiave{keyword} e \chiave{category}, assieme ai loro equivalenti preceduti da \chiave{not}. Tali opzioni sono dei filtri che individuano i riferimenti bibliografici di un certo tipo così da ottenere delle suddivisioni personalizzate.
+\begin{lstlisting}[style=es]
+\printbibheading
+\printbibliography[nottype=online,%
+	heading=subbibliography,title={Fonti a stampa}]
+\printbibliography[type=online,heading=subbibliography,%
+	title={Fonti online}]
+\end{lstlisting}
+In questo caso è stata usata l'opzione \chiave{type} per filtrare le fonti a stampa da quelle online, assieme all'opzione \chiave{title} per intitolare adeguatamente ciascuna sotto-bibliografia.
+
+In maniera analoga, si può utilizzare lo stesso metodo per creare dei filtri tra più tipi di materiale:\\[1ex]
+\begin{tabularx}{\linewidth}{@{}X@{}}
+\toprule
+\cs{printbibheading}\\
+\cs{printbibliography}\Marg{type=article,\ldots}\\
+\cs{printbibliography}\Marg{type=book,\ldots}\\
+\cs{printbibliography}\Marg{nottype=article,nottype=book,\ldots}\\
+\bottomrule
+\end{tabularx}\\[1ex]
+In questo esempio ho voluto distinguere tre tipi di materiale: le monografie, gli articoli e altro materiale che non appartiene alle prime due categorie; per ottenerlo ho combinato tra loro più elementi.
+
+Se un singolo filtro non fosse sufficiente, è anche possibile definire un filtro personalizzato, grazie al comando \cs{defbibfilter}, che supporta i raggruppamenti e gli operatori booleani \chiave{and} \chiave{or} e \chiave{not}.
+\begin{lstlisting}[style=es]
+\defbibfilter{chem1}{%
+( type=book or type=manual )
+and keyword=chimica
+and not keyword={chimica inorganica}
+}
+\end{lstlisting}
+Il primo argomento dà il nome al filtro, che potrà così essere utilizzato al momento di creare la bibliografia, usando l'opzione \chiave{filter$=$\meta{nome filtro}}. Il secondo argomento è il filtro vero e proprio, nella prima riga ho usato un raggruppamento, che va racchiuso tra parentesi tonde. Si presti attenzione che tutti gli elementi vanno separati tra loro da spazi, parentesi comprese, mentre non ci sono spazi attorno al segno di uguale; se un argomento è composto da più termini, come nell'ultima riga, va racchiuso tra graffe.
+
+\medskip
+Vediamo ora un altro caso, quello di voler dividere nella bibliografia le fonti primarie da quelle secondarie. In primo luogo bisogna assegnare ciascun riferimento a una \emph{categoria}, che faremo corrispondere al tipo di fonte. In fase di creazione delle bibliografie, l'opzione \chiave{category} permette di suddividere i riferimenti bibliografici in bibliografie corrispondenti alle categorie create in precedenza.
+Nel preambolo va fatta l'assegnazione dei record alle categorie:\\[1ex]
+\begin{tabularx}{\linewidth}{@{}X@{}}
+\toprule
+\cs{usepackage}\Marg{biblatex}\\
+\cs{DeclareBibliographyCategory}\Marg{primary}\\
+\cs{DeclareBibliographyCategory}\Marg{secondary}\\
+\cs{addtocategory}\Marg{primary}\marg{chiave1,chiave3,\ldots}\\
+\cs{addtocategory}\Marg{secondary}\marg{chiave2,chiave4,\ldots}\\
+\bottomrule
+\end{tabularx}\\[1ex]
+Un aspetto di questo approccio, che in certe situazioni può rivelarsi molto utile, è che si opera direttamente nel documento, senza dover modificare i dababase \file{bib}.
+
+Una volta effettuata questa operazione, si può procedere alla creazione della bibliografia, utilizzando l'opzione \chiave{category}:
+\begin{lstlisting}[style=es]
+\printbibheading
+\printbibliography[category=primary,%
+	heading=subbibliography,title={Fonti primarie}]
+\printbibliography[category=secondary,%
+	heading=subbibliography,title={Fonti secondarie}]
+\end{lstlisting}
+Il nome delle categorie può essere scelto a piacimento (ma chiaramente deve coincidere con quanto abbiamo dichiarato nel preambolo), così come i titoli delle sotto-bibliografie. È anche possibile definire prima i titoli delle sezioni di bibliografia relative a ciascuna categoria, così da poter creare tutte le sezioni con un unico comando \cs{bibbycategory}, tuttavia si rimanda alla guida (\textcite*[139]{biblatex}) per gli approfondimenti.%
+\footnote{Segnalo, per chi crea una bibliografia in più sezioni utilizzando uno stile numerico, l'opzione \chiave{defernumbers=true}, da inserire quando viene caricato il pacchetto. Senza l'opzione, i riferimenti bibliografici vengono numerati secondo l'ordine con cui appaiono nel testo, con la conseguenza che le sezioni di bibliografia avranno una numerazione discontinua (ad esempio, fonti primarie 2-3-5-7-8-10, fonti secondarie 1-4-6-9). Attivando l'opzione invece, la numerazione segue l'ordine dei riferimenti nelle sezioni, così che i numeri saranno tutti consequenziali (ad esempio, fonti primarie 1-2-3-4-5-6, fonti secondarie 7-8-9-10).}
+
+\medskip
+È possibile create delle suddivisioni arbitrarie anche con un altro procedimento, che fa uso del campo \chiave{keyword} dei record bibliografici. Il risultato non è molto diverso dal metodo che usa le categorie, ma il metodo segue una strada diversa, per cui val la pena vedere un esempio. Supponiamo, quindi, di essere in ambito giuridico, e di voler suddividere la bibliografia in tre parti: letteratura, giurisprudenza e normativa. La creazione delle tre sotto-bibliografie a questo punto non presenta particolari novità: 
+\begin{lstlisting}[style=es]
+\printbibheading
+\printbibliography[keyword=letteratura,%
+	heading=subbibliography,title={Letteratura}]
+\printbibliography[keyword=giurisprudenza,%
+	heading=subbibliography,title={Giurisprudenza}]
+\printbibliography[keyword=normativa,%
+	heading=subbibliography,title={Normativa}]
+\end{lstlisting}
+Questa operazione, tuttavia, può funzionare solo se ciascun record bibliografico contiene nel campo \chiave{keyword} il valore corretto. Ma come fare se non abbiamo preparato prima i nostri record in questo modo, e sono pure troppi per assegnarli manualmente a una categoria così da ricorrere al metodo precedente? In due semplici passaggi, è possibile automatizzare  l'operazione: in primo luogo va creato un database per ciascuna sotto-bibliografia, quindi, nel nostro caso, tre file. L'operazione è piuttosto agevole se la si effettua ricorrendo a un software di gestione della bibliografia come uno di quelli mostrati nella sezione~\ref{refman}.
+
+Nel secondo passaggio si fa ricorso a uno strumento messo a disposizione da \prog{biber} che si chiama \chiave{sourcemap}. L'uso di questa opzione permette di alterare in maniera automatizzata i dati di un database nel momento in cui vengono letti da \prog{biber}. Lo schema con cui vengono alterati i dati viene chiamata, appunto, mappa. L'opzione è molto versatile e viene illustrata ampiamente nella guida ufficiale (3.1.2 ``The \chiave{sourcemap} option'' in \textcite*[14--22]{biber}). Nel nostro esempio, abbiamo bisogno di aggiungere una \chiave{keyword} specifica a tutti record di un database: l'effetto si ottiene usando il comando \cs{DeclareSourcemap} in questo modo: 
+\begin{lstlisting}[style=es]
+\DeclareSourcemap{
+  \maps[datatype=bibtex, overwrite]{
+    \map{
+      \perdatasource{letteratura.bib}
+      \step[fieldset=KEYWORDS,%
+      	fieldvalue=letteratura, append]
+    }
+    \map{
+      \perdatasource{giurisprudenza.bib}
+      \step[fieldset=KEYWORDS,%
+      	fieldvalue=giurisprudenza, append]
+    }
+    \map{
+      \perdatasource{normativa.bib}
+      \step[fieldset=KEYWORDS,%
+      	fieldvalue=normativa, append]
+    }
+  }
+}
+\end{lstlisting}
+A questo punto, i comandi per la bibliografia indicati in precedenza possono trovare le parole chiave nei record corrispondenti e creare le tre sotto-bibliografie. È lo stesso metodo utilizzato in questa guida per dividere nelle due bibliografie i riferimenti relativi a \LaTeX\ dagli altri.
+
+L'ho già detto, ma vale la pena ripeterlo: la casistica qui presentata non può che essere parziale; io ho cercato di individuare degli esempi abbastanza comuni, con i quali mostrare strumenti e strategie per adattare le bibliografie alle proprie esigenze.
+
+Ora rimane solo una cosa da fare: creare bellissime bibliografie grazie a \pack{biblatex}!
+
 \backmatter
-%\clearpage
 \phantomsection
-%\sloppy
-%\emergencystretch 3em
-%\begin{refsection}[guida.bib]
+%\begin{refsection}[guida.bib] Vecchio test sulla suddivisione dei riferimenti
 \label{bib}
 \printbibliography[title={Bibliografia \LaTeX},keyword=latex]
 \nocite{*}
