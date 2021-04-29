@@ -1,3 +1,9 @@
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/GuITeX/biblio?label=current%20version)
+![Lines of code](https://img.shields.io/tokei/lines/github/GuITeX/biblio)
+![GitHub issues](https://img.shields.io/github/issues/GuITeX/biblio)
+[![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by-sa/4.0/)
+![GitHub Repo stars](https://img.shields.io/github/stars/GuITeX/biblio?style=social)
+
 Guida alla bibliografia con bibLaTeX
 ====================================
 
