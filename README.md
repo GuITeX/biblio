@@ -21,7 +21,7 @@ La guida tratta come costruire una bibliografia in LaTeX: nel primo capitolo ven
 Collaborazione
 --------------
 
-Nel condividere questo repository, l'intento è quello di permettere a chiunque di collaborare al progetto. Io stesso mi ci sono inoltrato su suggerimento di alcuni colleghe che mi hanno invitato a creare del materiale informativo per chi si trovasse nella condizione di dover inserire una bibliografia ben fatta nei propri documenti (lavorando io in una biblioteca universitaria, tra laureandi, dottorandi e ricercatori, gli utenti in questa condizioni sono abbastanza numerosi).
+Nel condividere questo repository, l'intento è quello di permettere a chiunque di collaborare al progetto. Io stesso mi ci sono cimentato su invito  di alcune colleghe che segnalavano l'esigenza di materiale informativo per chi si trovasse nella condizione di dover inserire una bibliografia ben fatta nei propri documenti (lavorando io in una biblioteca universitaria, tra laureandi, dottorandi e ricercatori, gli utenti in questa condizioni sono abbastanza numerosi).
 Nella creazione di questa guida sono stati preziosissimi i commenti e i suggerimenti che ho ricevuto, spesso da persone molto più competenti di me, spero dunque che chiunque capiti in questo repository voglia arricchirlo con la propria esperienza.
 
 Licenza
