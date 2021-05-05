@@ -14,10 +14,9 @@ jobs:
         uses: actions/checkout@v2
       - name: Compile LaTeX document
         run: |
-          pdflatex passages
+          lualatex passages
           lualatex bibliografia
-          biber guida
-          biber guida2
+          biber bibliografia
           lualatex bibliografia
           lualatex bibliografia
           lualatex bibliografia
