@@ -48,8 +48,10 @@ jobs:
       # Create release
       - name: Release
         uses: softprops/action-gh-release@v1
-        with: files: bibliografia.pdf
-        env:  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: bibliografia.pdf
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       # FTP upload on GuIT
       - name: Upload via ftp the PDF file
