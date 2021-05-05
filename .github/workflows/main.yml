@@ -16,7 +16,8 @@ jobs:
         run: |
           pdflatex passages
           lualatex bibliografia
-          biber bibliografia
+          biber guida
+          biber guida2
           lualatex bibliografia
           lualatex bibliografia
           lualatex bibliografia
