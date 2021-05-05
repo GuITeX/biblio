@@ -15,11 +15,11 @@ jobs:
       - name: Compile LaTeX document
         run: |
           pdflatex passages
-          pdflatex bibliografia
+          lualatex bibliografia
           biber bibliografia
-          pdflatex bibliografia
-          pdflatex bibliografia
-          pdflatex bibliografia
+          lualatex bibliografia
+          lualatex bibliografia
+          lualatex bibliografia
           mkdir assets
           cp bibliografia.pdf assets/bibliografia.pdf
       - name: Release
