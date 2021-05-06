@@ -71,7 +71,7 @@
 \RequirePackage{microtype}
 \RequirePackage{etoolbox}
 \RequirePackage{xcolor}
-\RequirePackage{natbib}
+%\RequirePackage{natbib}
 \RequirePackage{multicol}
 \RequirePackage{imakeidx}
 \RequirePackage{fancyvrb}
@@ -395,7 +395,7 @@ style=sameline,noitemsep,partopsep=\z@,topsep=.25\onelineskip}
 {%
     \end{multicols}\gdef\imki@idxprologue{}\clearpage
 }
-\AtBeginDocument{\bibliographystyle{guidatematica}}%
+%\AtBeginDocument{\bibliographystyle{guidatematica}}%
 \unless\ifPDFTeX
    \ifcsstring{xpg@main@language}{italian}%
      {\csgappto{init@extras@italian}{\nofrench@indent}}{}%
